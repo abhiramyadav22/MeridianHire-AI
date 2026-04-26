@@ -1,16 +1,25 @@
-const base = '/api';
+// client/src/lib/api.js
+
+const base =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 async function j(path, opt = {}, retries = 1) {
   try {
     const r = await fetch(`${base}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...opt.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(opt.headers || {}),
+      },
       ...opt,
       body: opt.body ? JSON.stringify(opt.body) : undefined,
     });
+
     const data = await r.json().catch(() => ({}));
+
     if (!r.ok) {
       throw new Error(data.error || r.statusText || 'Request failed');
     }
+
     return data;
   } catch (e) {
     if (retries > 0) {
@@ -23,11 +32,31 @@ async function j(path, opt = {}, retries = 1) {
 
 export const api = {
   health: () => j('/health'),
+
   createSession: (resumeText, jobDescription) =>
-    j('/session', { method: 'POST', body: { resumeText, jobDescription } }),
-  initialize: (sessionId) => j(`/session/${sessionId}/initialize`, { method: 'POST', body: {} }),
+    j('/session', {
+      method: 'POST',
+      body: { resumeText, jobDescription },
+    }),
+
+  initialize: (sessionId) =>
+    j(`/session/${sessionId}/initialize`, {
+      method: 'POST',
+      body: {},
+    }),
+
   interview: (sessionId, message) =>
-    j(`/session/${sessionId}/interview`, { method: 'POST', body: { message } }),
-  finalize: (sessionId) => j(`/session/${sessionId}/finalize`, { method: 'POST', body: {} }),
-  getSession: (sessionId) => j(`/session/${sessionId}`),
+    j(`/session/${sessionId}/interview`, {
+      method: 'POST',
+      body: { message },
+    }),
+
+  finalize: (sessionId) =>
+    j(`/session/${sessionId}/finalize`, {
+      method: 'POST',
+      body: {},
+    }),
+
+  getSession: (sessionId) =>
+    j(`/session/${sessionId}`),
 };
