@@ -1,6 +1,27 @@
-node_modules
-dist
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# env files
 .env
+.env.*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# optional: personal files
 *.pdf
 *.docx
 *.csv
