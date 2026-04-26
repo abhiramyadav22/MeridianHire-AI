@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-0: #0a0a0f;
+  --bg-1: #0f0f16;
+  --fg: #f4f4f5;
+  --muted: #a1a1aa;
+  --ring: rgba(99, 102, 241, 0.45);
+}
+
+html.light {
+  --bg-0: #f8fafc;
+  --bg-1: #ffffff;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --ring: rgba(99, 102, 241, 0.35);
+}
+
+body {
+  @apply font-body text-zinc-100 antialiased;
+  background: var(--bg-0);
+  min-height: 100vh;
+}
+
+html.light body {
+  @apply text-slate-900;
+  background: #f1f5f9;
+}
+
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-glass;
+}
+html.light .glass {
+  @apply bg-white/80 border-slate-200/80 shadow-lg text-slate-900;
+}
+
+.gradient-surface {
+  background: radial-gradient(1200px 600px at 20% -10%, rgba(99, 102, 241, 0.25), transparent 60%),
+    radial-gradient(800px 400px at 90% 20%, rgba(168, 85, 247, 0.2), transparent 50%),
+    var(--bg-0);
+}
+html.light .gradient-surface {
+  background: radial-gradient(1000px 500px at 20% 0%, rgba(99, 102, 241, 0.12), transparent 60%),
+    #f1f5f9;
+}
+
+.print-root {
+  background: #fff;
+  color: #111;
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-root,
+  .print-root * {
+    color: #111 !important;
+  }
+  .print-root {
+    background: #fff;
+    color: #111;
+    box-shadow: none !important;
+  }
+  .gradient-surface {
+    background: #fff !important;
+  }
+}
