@@ -1,19 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+
 import App from './App';
-import { ThemeProvider } from './context/ThemeContext';
-import { SessionProvider } from './context/SessionContext';
-import './index.css';
+import { SessionProvider } from './context/SessionContext'; // adjust path if needed
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider>
-        <SessionProvider>
-          <App />
-        </SessionProvider>
-      </ThemeProvider>
+      <SessionProvider>
+        <App />
+      </SessionProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
