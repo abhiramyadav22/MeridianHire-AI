@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-
 import { Shell } from './components/Layout/Shell';
 import Home from './pages/Home';
 import DashboardPage from './pages/DashboardPage';
