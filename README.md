@@ -183,33 +183,6 @@ Suggests improvements for candidates.
 
 ---
 
-⚠️ Common Issues & Solutions
-
-❌ Failed to fetch
-
-✔ Backend not running
-✔ Wrong API URL
-✔ Proxy not configured
-
----
-
-❌ Vercel not updating
-
-✔ Changes not pushed to GitHub
-
----
-
-❌ Git shows “nothing to commit”
-
-✔ File not saved
-✔ Working in wrong folder
-
----
-
-📸 Screenshots
-
-(Add your project screenshots here)
-
 ---
 
 📈 Future Enhancements
