@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Send, AlertCircle } from 'lucide-react';
 import { api } from '../lib/api';
@@ -19,14 +19,14 @@ export default function AssessmentPage() {
   const navigate = useNavigate();
   const [sp] = useSearchParams();
   const judge = sp.get('judge') === '1';
-  const { sessionId, isDemo, setPhase } = useSession();
+  const { sessionId, isDemo, setPhase, clear } = useSession();
   const [items, setItems] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [typing, setTyping] = useState(false);
   const [err, setErr] = useState(null);
   const [finalizing, setFinalizing] = useState(false);
-  const [loadingLabel, setLoadingLabel] = useState('Generating questions…');
+  const [loadingLabel, setLoadingLabel] = useState('Generating questions...');
   const [activePipelineStep, setActivePipelineStep] = useState(3);
   const [questionFeedback, setQuestionFeedback] = useState(null);
   const [sessionSnapshot, setSessionSnapshot] = useState(null);
@@ -58,7 +58,7 @@ export default function AssessmentPage() {
     if (!sessionId) return;
     setFinalizing(true);
     setActivePipelineStep(4);
-    setLoadingLabel('Scoring answers…');
+    setLoadingLabel('Scoring answers...');
     setPhase('scoring');
     try {
       await api.finalize(sessionId);
@@ -82,9 +82,9 @@ export default function AssessmentPage() {
       setInput('');
       setLoading(true);
       setTyping(true);
-      setLoadingLabel('Analyzing response…');
+      setLoadingLabel('Analyzing response...');
       await wait(500 + Math.random() * 400);
-      setLoadingLabel('Generating next question…');
+      setLoadingLabel('Generating next question...');
       const { result } = await api.interview(sessionId, t);
       setTyping(false);
       setLoading(false);
@@ -145,7 +145,7 @@ export default function AssessmentPage() {
           return;
         }
         setTyping(true);
-        setLoadingLabel('Generating questions…');
+        setLoadingLabel('Generating questions...');
         await wait(600 + Math.random() * 400);
         if (!go) return;
         setTyping(false);
@@ -158,7 +158,7 @@ export default function AssessmentPage() {
           for (let k = 0; k < DEMO_CANDIDATE_REPLIES.length; k += 1) {
             if (!go) return;
             if (last?.isComplete) {
-              setBanner('Compiling your hiring report and learning plan…');
+              setBanner('Compiling your hiring report and learning plan...');
               await finalize();
               return;
             }
@@ -166,7 +166,7 @@ export default function AssessmentPage() {
             setItems((prev) => [...prev, { role: 'user', content: reply }]);
             setLoading(true);
             setTyping(true);
-            setLoadingLabel('Analyzing response…');
+            setLoadingLabel('Analyzing response...');
             await wait(500 + Math.random() * 350);
             if (!go) return;
             const { result: next } = await api.interview(sessionId, reply);
@@ -176,18 +176,18 @@ export default function AssessmentPage() {
             appendAssistant(next);
             last = next;
             if (next?.isComplete) {
-              setBanner('Compiling your hiring report and learning plan…');
+              setBanner('Compiling your hiring report and learning plan...');
               await wait(450);
               if (go) await finalize();
               return;
             }
           }
           if (go && last && !last.isComplete) {
-            setBanner('Compiling your hiring report and learning plan…');
+            setBanner('Compiling your hiring report and learning plan...');
             await finalize();
           }
         } else if (first?.isComplete) {
-          setBanner('Compiling your hiring report and learning plan…');
+          setBanner('Compiling your hiring report and learning plan...');
           await wait(300);
           if (go) await finalize();
         }
@@ -195,6 +195,11 @@ export default function AssessmentPage() {
         if (go) {
           setTyping(false);
           setLoading(false);
+          if (String(e?.message || '').includes('Session not found')) {
+            clear();
+            navigate('/', { replace: true });
+            return;
+          }
           setErr(e?.message || 'Could not start the interview');
         }
       }
@@ -204,7 +209,7 @@ export default function AssessmentPage() {
     return () => {
       go = false;
     };
-  }, [appendAssistant, finalize, isDemo, judge, navigate, sessionId]);
+  }, [appendAssistant, clear, finalize, isDemo, judge, navigate, sessionId]);
 
   if (!sessionId) return null;
 
@@ -214,9 +219,9 @@ export default function AssessmentPage() {
     (async () => {
       const res = await runUserMessage(input);
       if (res?.isComplete) {
-        setBanner('Compiling your hiring report and learning plan…');
+        setBanner('Compiling your hiring report and learning plan...');
         setActivePipelineStep(4);
-        setLoadingLabel('Finalizing assessment…');
+        setLoadingLabel('Finalizing assessment...');
         await wait(300);
         await finalize();
       }
@@ -282,13 +287,13 @@ export default function AssessmentPage() {
           </div>
         )}
         {items.length === 0 && !loading && !typing && !err && (
-          <p className="text-sm text-zinc-500 light:text-slate-500">Composing the first question…</p>
+          <p className="text-sm text-zinc-500 light:text-slate-500">Composing the first question...</p>
         )}
         <MessageList items={items} />
         {questionFeedback ? (
-          <div className="mt-3 ml-10 rounded-xl border border-indigo-500/20 bg-indigo-500/10 p-3 text-xs light:bg-indigo-50 light:border-indigo-200">
-            <p className="text-indigo-300 light:text-indigo-700 font-semibold">
-              Real-time feedback · {questionFeedback.score.toFixed(1)}/10
+          <div className="mt-3 ml-10 rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-xs light:bg-cyan-50 light:border-cyan-200">
+            <p className="text-cyan-300 light:text-cyan-700 font-semibold">
+              Real-time feedback - {questionFeedback.score.toFixed(1)}/10
             </p>
             <p className="text-zinc-300 light:text-slate-700 mt-1">
               <strong>What was strong:</strong> {questionFeedback.strengths}
@@ -313,11 +318,11 @@ export default function AssessmentPage() {
         <input
           className={clsx(
             'flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm',
-            'text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/30',
+            'text-zinc-100 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/30',
             'light:bg-slate-50 light:border-slate-200 light:text-slate-900',
             judge && isDemo && 'cursor-not-allowed opacity-60'
           )}
-          placeholder={judge && isDemo ? 'Autoplay in judge demo' : 'Type your answer…'}
+          placeholder={judge && isDemo ? 'Autoplay in judge demo' : 'Type your answer...'}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={loading || typing || finalizing || (judge && isDemo)}
@@ -325,7 +330,7 @@ export default function AssessmentPage() {
         <button
           type="submit"
           disabled={loading || typing || finalizing || (judge && isDemo) || !input.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-xl bg-cyan-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
         >
           <Send className="h-4 w-4" />
           Send

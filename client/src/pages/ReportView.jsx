@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Printer, AlertCircle } from 'lucide-react';
@@ -7,7 +7,7 @@ import { useSession } from '../context/SessionContext';
 import { VerdictBadge } from '../components/ui/VerdictBadge';
 import { LearningPlanTimeline } from '../components/LearningPlanTimeline';
 export default function ReportView() {
-  const { sessionId } = useSession();
+  const { sessionId, clear } = useSession();
   const navigate = useNavigate();
   const [s, setS] = useState(null);
   const [err, setErr] = useState(null);
@@ -26,10 +26,15 @@ export default function ReportView() {
         }
         setS(d);
       } catch (e) {
+        if (String(e?.message || '').includes('Session not found')) {
+          clear();
+          navigate('/', { replace: true });
+          return;
+        }
         setErr(e.message);
       }
     })();
-  }, [navigate, sessionId]);
+  }, [clear, navigate, sessionId]);
 
   if (!sessionId) return null;
   if (err) {
@@ -76,20 +81,23 @@ export default function ReportView() {
 
   return (
     <div>
-      <div className="no-print flex flex-wrap items-center justify-between gap-2 mb-6">
-        <h1 className="font-display text-2xl font-semibold text-white light:text-slate-900">Hiring report</h1>
+      <div className="no-print surface-panel mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl p-4">
+        <div>
+          <p className="muted-label">Exportable artifact</p>
+          <h1 className="mt-1 font-display text-2xl font-semibold text-slate-50 light:text-slate-950">Hiring report</h1>
+        </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onCopySummary}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:bg-white/10 light:border-slate-200 light:bg-white"
+            className="btn-secondary"
           >
             Copy summary
           </button>
           <button
             type="button"
             onClick={onPrint}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:bg-white/10 light:border-slate-200 light:bg-white"
+            className="btn-secondary"
           >
             <Printer className="h-4 w-4" />
             Export (print to PDF)
@@ -161,25 +169,25 @@ export default function ReportView() {
                 <details key={sk.skillName} id={skillId} className="border border-slate-200 rounded-lg p-3 break-inside-avoid bg-slate-950/5 light:bg-slate-50">
                   <summary className="flex items-center justify-between cursor-pointer font-semibold text-slate-900 light:text-slate-900">
                     <span>{sk.skillName}</span>
-                    <span className="text-indigo-600">{Number(sk.score).toFixed(1)}/10</span>
+                    <span className="text-cyan-600">{Number(sk.score).toFixed(1)}/10</span>
                   </summary>
                   <div className="mt-3 space-y-2 text-slate-700 light:text-slate-800">
                     <p>{sk.explanation}</p>
                     <p className="text-xs text-slate-500 light:text-slate-600">Confidence: {((sk.confidence || 0) * 100).toFixed(0)}%</p>
                     {sk.strengths?.length > 0 && (
-                      <p className="mt-1 text-emerald-800 text-xs light:text-emerald-700">Strengths: {sk.strengths.join(' · ')}</p>
+                      <p className="mt-1 text-emerald-800 text-xs light:text-emerald-700">Strengths: {sk.strengths.join(' - ')}</p>
                     )}
                     {sk.weaknesses?.length > 0 && (
-                      <p className="mt-1 text-amber-800 text-xs light:text-amber-700">Gaps: {sk.weaknesses.join(' · ')}</p>
+                      <p className="mt-1 text-amber-800 text-xs light:text-amber-700">Gaps: {sk.weaknesses.join(' - ')}</p>
                     )}
                     {(sk.resumeEvidence?.length > 0 || sk.answerSnippets?.length > 0) && (
                       <div className="mt-2 rounded-xl border border-slate-200/70 bg-white/5 p-3 text-xs text-slate-500 light:border-slate-200 light:bg-white/95 light:text-slate-700">
                         <div className="font-semibold uppercase tracking-wide text-[11px] text-slate-500 light:text-slate-500">Evidence</div>
                         {sk.resumeEvidence?.map((e, n) => (
-                          <p key={`resume-${n}`} className="mt-1 italic">“{e.snippet}” — {e.relevance}</p>
+                          <p key={`resume-${n}`} className="mt-1 italic">"{e.snippet}" - {e.relevance}</p>
                         ))}
                         {sk.answerSnippets?.map((e, n) => (
-                          <p key={`answer-${n}`} className="mt-1 italic">“{e.excerpt}” — {e.turnHint}</p>
+                          <p key={`answer-${n}`} className="mt-1 italic">"{e.excerpt}" - {e.turnHint}</p>
                         ))}
                       </div>
                     )}
@@ -200,7 +208,7 @@ export default function ReportView() {
             <ul className="list-disc pl-4 text-sm text-slate-800">
               {(l.criticalGaps || []).map((g) => (
                 <li key={g.skillName}>
-                  {g.skillName} — ~{g.estimatedWeeks}w, {g.reason}
+                  {g.skillName} - ~{g.estimatedWeeks}w, {g.reason}
                 </li>
               ))}
             </ul>
@@ -208,7 +216,7 @@ export default function ReportView() {
             <ul className="list-decimal pl-4 text-sm text-slate-800">
               {(l.weeklyRoadmap || []).map((w) => (
                 <li key={w.week}>
-                  Week {w.week}: {w.focus} — {w.milestones?.join('; ')}
+                  Week {w.week}: {w.focus} - {w.milestones?.join('; ')}
                 </li>
               ))}
             </ul>
@@ -216,7 +224,7 @@ export default function ReportView() {
             <ul className="text-sm text-slate-800 list-disc pl-4">
               {(l.resources || []).map((x, i) => (
                 <li key={i}>
-                  {x.title} — {x.url} ({x.type})
+                  {x.title} - {x.url} ({x.type})
                 </li>
               ))}
             </ul>
@@ -232,25 +240,25 @@ export default function ReportView() {
             <div className="mt-2 grid md:grid-cols-3 gap-2 text-xs">
               <div className="rounded-lg border border-slate-200 p-2">
                 <p className="font-semibold mb-1">Required skills</p>
-                <p>{(structured.required_skills || []).join(', ') || '—'}</p>
+                <p>{(structured.required_skills || []).join(', ') || ' - '}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-2">
                 <p className="font-semibold mb-1">Candidate skills</p>
-                <p>{(structured.candidate_skills || []).join(', ') || '—'}</p>
+                <p>{(structured.candidate_skills || []).join(', ') || ' - '}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-2">
                 <p className="font-semibold mb-1">Missing skills</p>
-                <p>{(structured.missing_skills || []).join(', ') || '—'}</p>
+                <p>{(structured.missing_skills || []).join(', ') || ' - '}</p>
               </div>
             </div>
             <div className="mt-2 grid md:grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg border border-slate-200 p-2">
                 <p className="font-semibold mb-1">Strong skills</p>
-                <p>{(structured.strong_skills || []).join(', ') || '—'}</p>
+                <p>{(structured.strong_skills || []).join(', ') || ' - '}</p>
               </div>
               <div className="rounded-lg border border-slate-200 p-2">
                 <p className="font-semibold mb-1">Weak skills</p>
-                <p>{(structured.weak_skills || []).join(', ') || '—'}</p>
+                <p>{(structured.weak_skills || []).join(', ') || ' - '}</p>
               </div>
             </div>
           </section>
@@ -265,7 +273,7 @@ export default function ReportView() {
           animate={{ opacity: 1 }}
           className="text-xs text-zinc-500 text-center mt-4 light:text-slate-500"
         >
-          Use the browser’s print dialog to save as PDF.
+          Use the browser's print dialog to save as PDF.
         </motion.p>
       </div>
     </div>

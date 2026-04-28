@@ -3,51 +3,121 @@
 @tailwind utilities;
 
 :root {
-  --bg-0: #0a0a0f;
-  --bg-1: #0f0f16;
-  --fg: #f4f4f5;
-  --muted: #a1a1aa;
-  --ring: rgba(99, 102, 241, 0.45);
-}
-
-html.light {
-  --bg-0: #f8fafc;
+  --bg-0: #f4f7fa;
   --bg-1: #ffffff;
+  --bg-2: #e8eef5;
   --fg: #0f172a;
   --muted: #64748b;
-  --ring: rgba(99, 102, 241, 0.35);
+  --ring: rgba(8, 145, 178, 0.28);
 }
 
-body {
-  @apply font-sans text-zinc-100 antialiased;
-  background: var(--bg-0);
-  min-height: 100vh;
+html:not(.light) {
+  --bg-0: #070b10;
+  --bg-1: #0d141c;
+  --bg-2: #131d27;
+  --fg: #f8fafc;
+  --muted: #94a3b8;
+  --ring: rgba(14, 165, 233, 0.38);
 }
 
-html.light body {
-  @apply text-slate-900;
-  background: #f1f5f9;
-}
+@layer base {
+  * {
+    @apply border-zinc-800/80;
+  }
 
-.glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10;
-}
+  html {
+    @apply scroll-smooth;
+  }
 
-html.light .glass {
-  @apply bg-white/80 border-slate-200/80 text-slate-900;
+  body {
+    @apply min-h-screen font-sans text-slate-900 antialiased;
+    background: var(--bg-0);
+  }
+
+  html:not(.light) body {
+    @apply text-slate-100;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
 }
 
 .gradient-surface {
   background:
-    radial-gradient(1200px 600px at 20% -10%, rgba(99, 102, 241, 0.25), transparent 60%),
-    radial-gradient(800px 400px at 90% 20%, rgba(168, 85, 247, 0.2), transparent 50%),
+    linear-gradient(145deg, rgba(248, 250, 252, 0.95) 0%, rgba(239, 246, 251, 0.95) 100%),
     var(--bg-0);
 }
 
-html.light .gradient-surface {
+html:not(.light) .gradient-surface {
   background:
-    radial-gradient(1000px 500px at 20% 0%, rgba(99, 102, 241, 0.12), transparent 60%),
-    #f1f5f9;
-}body {
-  border: 5px solid red;
+    linear-gradient(145deg, rgba(7, 11, 16, 0.98) 0%, rgba(11, 18, 26, 0.98) 48%, rgba(8, 21, 27, 0.98) 100%),
+    var(--bg-0);
+}
+
+@layer components {
+  .glass,
+  .surface-panel {
+    @apply border border-slate-700/60 bg-slate-900/55 shadow-glass backdrop-blur-xl;
+  }
+
+  html.light .glass,
+  html.light .surface-panel {
+    @apply border-slate-200/90 bg-white/95 text-slate-900 shadow-sm;
+  }
+
+  .surface-card {
+    @apply rounded-lg border border-slate-700/60 bg-slate-900/45 p-4 shadow-glass;
+  }
+
+  html.light .surface-card {
+    @apply border-slate-200/80 bg-white text-slate-900 shadow-sm;
+  }
+
+  .field-control {
+    @apply w-full rounded-lg border border-slate-700/70 bg-slate-950/65 px-3 py-2.5 text-sm text-slate-100 outline-none transition;
+    @apply placeholder:text-slate-500 focus:border-cyan-400/70 focus:ring-2 focus:ring-cyan-500/20;
+  }
+
+  html.light .field-control {
+    @apply border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-cyan-600/60;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white transition;
+    @apply hover:bg-cyan-500 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700/70 bg-slate-900/60 px-4 py-2.5 text-sm font-semibold text-slate-100 transition;
+    @apply hover:bg-slate-800/80 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  html.light .btn-secondary {
+    @apply border-slate-200 bg-white text-slate-800 hover:bg-slate-50;
+  }
+
+  .muted-label {
+    @apply text-[11px] font-semibold uppercase text-slate-500;
+    letter-spacing: 0.08em;
+  }
+
+  html.light .muted-label {
+    @apply text-slate-500;
+  }
+
+  .metric-strip {
+    @apply rounded-lg border border-slate-700/60 bg-slate-950/40 px-3 py-2;
+  }
+
+  html.light .metric-strip {
+    @apply border-slate-200 bg-slate-50;
+  }
+
+  .conic-preview {
+    background: conic-gradient(#18c79a 0deg, #1478e8 255deg, #e2e8f0 255deg 360deg);
+  }
 }

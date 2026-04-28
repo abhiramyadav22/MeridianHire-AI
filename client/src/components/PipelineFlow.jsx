@@ -22,7 +22,7 @@ export function PipelineFlow({ activeStep = 0, label, steps = DEFAULT_STEPS, com
             key={label}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-indigo-300 light:text-indigo-700"
+            className="text-xs text-cyan-300 light:text-cyan-700"
           >
             {label}
           </motion.p>
@@ -41,7 +41,7 @@ export function PipelineFlow({ activeStep = 0, label, steps = DEFAULT_STEPS, com
               className={clsx(
                 'rounded-xl border px-3 py-2 min-h-[68px] transition-all',
                 done && 'border-emerald-500/30 bg-emerald-500/10',
-                active && 'border-indigo-500/40 bg-indigo-500/10 shadow-glass',
+                active && 'border-cyan-500/40 bg-cyan-500/10 shadow-glass',
                 !done && !active && 'border-white/10 bg-white/[0.02] light:border-slate-200 light:bg-slate-50'
               )}
             >
@@ -49,7 +49,7 @@ export function PipelineFlow({ activeStep = 0, label, steps = DEFAULT_STEPS, com
                 {done ? (
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 ) : active ? (
-                  <LoaderCircle className="h-4 w-4 text-indigo-400 animate-spin" />
+                  <LoaderCircle className="h-4 w-4 text-cyan-400 animate-spin" />
                 ) : (
                   <span className="h-4 w-4 rounded-full border border-zinc-600 light:border-slate-300" />
                 )}
@@ -61,7 +61,7 @@ export function PipelineFlow({ activeStep = 0, label, steps = DEFAULT_STEPS, com
                   initial={{ width: '0%' }}
                   animate={{ width: '100%' }}
                   transition={{ duration: 1.4, repeat: Infinity }}
-                  className="h-0.5 mt-2 rounded-full bg-gradient-to-r from-indigo-400 to-fuchsia-400"
+                  className="h-0.5 mt-2 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400"
                 />
               )}
             </motion.div>

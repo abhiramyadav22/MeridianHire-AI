@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -14,7 +14,7 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
-import { Award, BookOpen, ArrowRight, AlertCircle, Crosshair, Layers } from 'lucide-react';
+import { Award, BookOpen, ArrowRight, AlertCircle, Crosshair, Layers, Gauge, ShieldCheck } from 'lucide-react';
 import { api } from '../lib/api';
 import { useSession } from '../context/SessionContext';
 import { clsx } from '../components/ui/cn';
@@ -35,7 +35,7 @@ function SkillRow({ name, value, sub, color }) {
       </div>
       <div className="h-2 rounded-full bg-zinc-800/80 light:bg-slate-200 overflow-hidden">
         <motion.div
-          className={clsx('h-full rounded-full', color || 'bg-indigo-500')}
+          className={clsx('h-full rounded-full', color || 'bg-cyan-500')}
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(100, (value / 10) * 100)}%` }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
@@ -46,7 +46,7 @@ function SkillRow({ name, value, sub, color }) {
 }
 
 export default function DashboardPage() {
-  const { sessionId } = useSession();
+  const { sessionId, clear } = useSession();
   const navigate = useNavigate();
   const [s, setS] = useState(null);
   const [err, setErr] = useState(null);
@@ -95,10 +95,15 @@ export default function DashboardPage() {
         }
         setS(d);
       } catch (e) {
+        if (String(e?.message || '').includes('Session not found')) {
+          clear();
+          navigate('/', { replace: true });
+          return;
+        }
         setErr(e.message);
       }
     })();
-  }, [navigate, sessionId]);
+  }, [clear, navigate, sessionId]);
 
   if (!sessionId) return null;
   if (err) {
@@ -128,12 +133,12 @@ export default function DashboardPage() {
   const testedNames = new Set(skills.map((k) => k.skillName));
 
   const radar = skills.slice(0, 8).map((k) => ({
-    skill: k.skillName.length > 12 ? `${k.skillName.slice(0, 10)}…` : k.skillName,
+    skill: k.skillName.length > 12 ? `${k.skillName.slice(0, 10)}...` : k.skillName,
     score: Math.min(10, Math.max(0, Number(k.score) || 0)),
   }));
 
   const barData = skills.map((k) => ({
-    name: k.skillName.length > 10 ? `${k.skillName.slice(0, 8)}…` : k.skillName,
+    name: k.skillName.length > 10 ? `${k.skillName.slice(0, 8)}...` : k.skillName,
     s: Math.min(10, Math.max(0, Number(k.score) || 0)),
   }));
 
@@ -150,34 +155,72 @@ export default function DashboardPage() {
     : report?.hiringVerdict === 'Moderate Hire'
       ? 'Moderate Fit'
       : 'Needs Improvement';
+  const riskCount = ev?.overall?.riskFactors?.length || weak.length;
+  const evidenceCount = skills.reduce(
+    (sum, sk) => sum + (sk.resumeEvidence?.length || 0) + (sk.answerSnippets?.length || 0),
+    0
+  );
+  const modeLabel = {
+    balanced: 'Balanced',
+    senior_system: 'Senior Systems',
+    frontend_product: 'Frontend Product',
+    speed_screen: 'Fast Screen',
+  }[s.options?.assessmentMode || 'balanced'] || 'Balanced';
 
   return (
-    <div className="max-w-6xl space-y-8">
-      <PipelineFlow activeStep={6} label="Final report generated" />
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-white light:text-slate-900">Hiring intelligence</h1>
-          <p className="text-sm text-zinc-400 light:text-slate-600 mt-0.5">
-            {extract?.roleTitle || 'Role'} — evidence-based view of fit and potential
-          </p>
-          <p className="text-xs text-zinc-500 mt-1 light:text-slate-500">Candidate: {s.candidateName || 'Demo candidate'}</p>
+    <div className="max-w-6xl space-y-6">
+      <div className="surface-panel rounded-xl p-5">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="muted-label">Decision cockpit</p>
+            <h1 className="mt-1 font-display text-2xl font-semibold text-slate-50 light:text-slate-950">
+              Hiring intelligence
+            </h1>
+            <p className="mt-1 text-sm text-slate-400 light:text-slate-600">
+              {extract?.roleTitle || 'Role'} - evidence-based view of fit and potential
+            </p>
+            <p className="mt-1 text-xs text-slate-500">Candidate: {s.candidateName || 'Demo candidate'}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={simulateImprovement}
+              className="btn-primary bg-emerald-600 hover:bg-emerald-500"
+            >
+              <Gauge className="h-4 w-4" />
+              Simulate improvement
+            </button>
+            <Link
+              to="/report"
+              className="btn-secondary"
+            >
+              Full report <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={simulateImprovement}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-400"
-          >
-            <span>Simulate Candidate Improvement</span>
-          </button>
-          <Link
-            to="/report"
-            className="inline-flex items-center gap-1 text-sm text-indigo-300 hover:text-indigo-200 light:text-indigo-600"
-          >
-            Full report <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="metric-strip">
+            <p className="muted-label">Assessment mode</p>
+            <p className="mt-1 text-sm font-semibold text-cyan-200 light:text-cyan-800">{modeLabel}</p>
+          </div>
+          <div className="metric-strip">
+            <p className="muted-label">Evidence points</p>
+            <p className="mt-1 text-sm font-semibold text-slate-100 light:text-slate-900">{evidenceCount}</p>
+          </div>
+          <div className="metric-strip">
+            <p className="muted-label">Risk signals</p>
+            <p className="mt-1 text-sm font-semibold text-amber-200 light:text-amber-800">{riskCount}</p>
+          </div>
+          <div className="metric-strip">
+            <p className="muted-label">Governance</p>
+            <p className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-emerald-200 light:text-emerald-800">
+              <ShieldCheck className="h-4 w-4" />
+              Human review
+            </p>
+          </div>
         </div>
       </div>
+      <PipelineFlow activeStep={6} label="Final report generated" />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {(s.pipeline?.steps || []).map((step, idx) => {
           const done = idx <= (s.pipeline?.currentStep ?? 0);
@@ -250,10 +293,10 @@ export default function DashboardPage() {
         </motion.div>
       )}
       {structured.decision_trace && (
-        <div className="glass rounded-2xl border border-violet-400/20 p-5 light:bg-white/90">
+        <div className="glass rounded-2xl border border-cyan-400/20 p-5 light:bg-white/90">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
-              <p className="text-xs uppercase tracking-wide text-violet-300">Agent decision trace</p>
+              <p className="text-xs uppercase tracking-wide text-cyan-300">Agent decision trace</p>
               <h2 className="text-lg font-semibold text-white light:text-slate-900">Autonomous focus and reasoning</h2>
             </div>
           </div>
@@ -310,7 +353,7 @@ export default function DashboardPage() {
             <h2 className="text-sm font-semibold text-zinc-200 light:text-slate-900">Skill radar</h2>
             <Crosshair className="h-4 w-4 text-zinc-500" />
           </div>
-          <p className="text-xs text-zinc-500 mb-3">Tested skills (interview) — 0–10</p>
+          <p className="text-xs text-zinc-500 mb-3">Tested skills (interview) - 0-10</p>
           {radar.length > 0 ? (
             <div className="h-[280px] w-full">
               <ResponsiveContainer>
@@ -404,10 +447,10 @@ export default function DashboardPage() {
                 sub={
                   w.c != null ? <span>conf. {(w.c * 100).toFixed(0)}%</span> : null
                 }
-                color="bg-fuchsia-500"
+                color="bg-emerald-500"
               />
             ))}
-            {!weak.length && <p className="text-sm text-zinc-500">—</p>}
+            {!weak.length && <p className="text-sm text-zinc-500"> - </p>}
           </div>
         </div>
       </div>
@@ -422,22 +465,22 @@ export default function DashboardPage() {
             >
               <div className="flex justify-between font-medium text-zinc-100 light:text-slate-900">
                 {sk.skillName}
-                <span className="text-indigo-300 light:text-indigo-600">{Number(sk.score).toFixed(1)}/10</span>
+                <span className="text-cyan-300 light:text-cyan-600">{Number(sk.score).toFixed(1)}/10</span>
               </div>
               <p className="text-xs text-zinc-400 mt-1 line-clamp-3 light:text-slate-600">{sk.explanation}</p>
               {sk.strengths?.length ? (
                 <p className="text-[11px] mt-1 text-emerald-300 light:text-emerald-700">
-                  Strengths: {sk.strengths.slice(0, 2).join(' · ')}
+                  Strengths: {sk.strengths.slice(0, 2).join(' - ')}
                 </p>
               ) : null}
               {sk.weaknesses?.length ? (
                 <p className="text-[11px] mt-1 text-amber-300 light:text-amber-700">
-                  Missed concepts: {sk.weaknesses.slice(0, 2).join(' · ')}
+                  Missed concepts: {sk.weaknesses.slice(0, 2).join(' - ')}
                 </p>
               ) : null}
               {sk.resumeEvidence?.[0] && (
                 <p className="text-[10px] text-zinc-500 mt-2 italic line-clamp-2 light:text-slate-500">
-                  “{sk.resumeEvidence[0].snippet}”
+                  "{sk.resumeEvidence[0].snippet}"
                 </p>
               )}
             </div>
@@ -450,7 +493,7 @@ export default function DashboardPage() {
           {
             title: 'Scoring detail',
             icon: <Layers className="h-4 w-4" />,
-            body: skills[0] ? 'Top skill score drives depth signals — open Report for all rows.' : '—',
+            body: skills[0] ? 'Top skill score drives depth signals - open Report for all rows.' : ' - ',
           },
           {
             title: 'Next step',
@@ -460,7 +503,7 @@ export default function DashboardPage() {
           {
             title: 'Gaps to watch',
             icon: <AlertCircle className="h-4 w-4" />,
-            body: ev?.overall?.riskFactors?.[0] || (weak[0] ? `Priority: ${weak[0].n}` : '—'),
+            body: ev?.overall?.riskFactors?.[0] || (weak[0] ? `Priority: ${weak[0].n}` : ' - '),
           },
         ].map((c) => (
           <div key={c.title} className="glass rounded-xl p-3 text-sm text-zinc-300 light:text-slate-600">
@@ -530,7 +573,7 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-zinc-100 light:text-slate-900">{sk.skillName}</p>
                   <div className="inline-flex items-center gap-2">
                     <span className="text-xs text-zinc-400">{status}</span>
-                    <span className="text-sm text-indigo-300 light:text-indigo-600">{Number(sk.score).toFixed(1)}/10</span>
+                    <span className="text-sm text-cyan-300 light:text-cyan-600">{Number(sk.score).toFixed(1)}/10</span>
                   </div>
                 </div>
                 <p className="text-xs text-zinc-500 mt-1 line-clamp-2 light:text-slate-600">{sk.explanation}</p>

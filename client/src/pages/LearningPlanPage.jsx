@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Clock3, Target } from 'lucide-react';
 import { api } from '../lib/api';
@@ -9,7 +9,7 @@ import { LearningPlanTimeline } from '../components/LearningPlanTimeline';
 import { PipelineFlow } from '../components/PipelineFlow';
 
 export default function LearningPlanPage() {
-  const { sessionId } = useSession();
+  const { sessionId, clear } = useSession();
   const navigate = useNavigate();
   const [s, setS] = useState(null);
   const [err, setErr] = useState(null);
@@ -28,10 +28,15 @@ export default function LearningPlanPage() {
         }
         setS(d);
       } catch (e) {
+        if (String(e?.message || '').includes('Session not found')) {
+          clear();
+          navigate('/', { replace: true });
+          return;
+        }
         setErr(e.message);
       }
     })();
-  }, [navigate, sessionId]);
+  }, [clear, navigate, sessionId]);
 
   if (!sessionId) return null;
   if (err) {
@@ -109,8 +114,8 @@ export default function LearningPlanPage() {
             {!daily.length && <p className="text-sm text-zinc-500">No daily tasks generated yet.</p>}
           </div>
 
-          <div className="mt-4 rounded-lg border border-indigo-500/20 bg-indigo-500/10 p-3">
-            <p className="text-xs uppercase tracking-wide text-indigo-300 inline-flex items-center gap-1">
+          <div className="mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 p-3">
+            <p className="text-xs uppercase tracking-wide text-cyan-300 inline-flex items-center gap-1">
               <Target className="h-3.5 w-3.5" />
               Time estimate
             </p>

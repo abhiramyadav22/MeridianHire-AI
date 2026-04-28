@@ -1,15 +1,22 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext({ theme: 'dark', toggle: () => {} });
+const THEME_KEY = 'meridian-theme-v2';
+
+const ThemeContext = createContext({ theme: 'light', toggle: () => {} });
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('meridian-theme') || 'dark');
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem(THEME_KEY) || 'light';
+  });
 
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'light') root.classList.add('light');
     else root.classList.remove('light');
-    localStorage.setItem('meridian-theme', theme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(THEME_KEY, theme);
+    }
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));

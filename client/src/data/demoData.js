@@ -1,4 +1,4 @@
-export const DEMO_RESUME = `Alex Rivera
+﻿export const DEMO_RESUME = `Alex Rivera
 alex.rivera@email.com | San Francisco, CA
 Senior Software Engineer
 
@@ -6,13 +6,13 @@ SUMMARY
 Product-minded engineer with 6+ years building data-intensive web apps. Led platform migrations, mentored 4 engineers, and shipped A/B tested features to millions of users.
 
 EXPERIENCE
-FinScale — Senior Software Engineer (2021–Present)
+FinScale - Senior Software Engineer (2021-Present)
 - Own the payments and ledger microservices (Node.js, TypeScript, PostgreSQL, Redis, Kafka)
 - Cut p99 latency 38% by redesigning read paths, adding read-through caches, and backpressure
 - Introduced SLOs, error budgets, and on-call playbooks; reduced P1 pages 40% YoY
 - Cross-functional with product and design; ran incident reviews and postmortems
 
-DataCraft — Software Engineer (2018–2021)
+DataCraft - Software Engineer (2018-2021)
 - React + GraphQL + Python services; built internal admin tools and ETL for analytics
 - Migrated a monolith module to a modular service, improving testability and release cadence
 
